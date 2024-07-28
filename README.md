@@ -17,6 +17,178 @@
 </ul>
 
 ## Judul Proyek
+<p>Smarthome dengan Platform Blynk</p>
+
+## Penjelasan
+<p>Membuat proyek Smarthome dengan ESP32 yang terhubung ke platform Blynk. Proyek ini mencakup kontrol relay untuk menyalakan LED, pengaturan kecerahan LED dengan potensiometer, pembacaan suhu dan kelembapan dengan DHT22, serta prediksi kondisi berdasarkan suhu dan kelembapan.<p>
+
+## Alat-alat
+## Spesifikasi Proyek
+1. Platform Blynk
+2. Relay 2 Channel untuk menyalakan LED
+3. Potensiometer untuk mengatur kecerahan LED dengan PWM
+4. DHT22 untuk mengukur suhu dan kelembapan
+5. Prediksi kondisi berdasarkan suhu dan kelembapan
+6. Restful API untuk integrasi Smarthome
+  
+## Komponen yang Diperlukan
+1. ESP32
+2. Relay 2 Channel
+3. LED
+4. Potensiometer
+5. DHT22
+6. Platform Blynk
+
+## Dokumentasi Wokwi
+|======================================================================|
+#define BLYNK_TEMPLATE_ID "TMPL6tx0XyWZc"
+#define BLYNK_TEMPLATE_NAME "22552012046"
+#define BLYNK_AUTH_TOKEN "62IWHiEW6teE4Z2x-FEG_Iabbe0rWdZN"
+
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
+#include <DHT.h>
+#include <WebServer.h>
+
+// Blynk Auth Token
+char auth[] = BLYNK_AUTH_TOKEN;
+
+// WiFi credentials
+char ssid[] = "MonsterEnergy";
+char pass[] = "123456";
+
+// DHT sensor
+#define DHTPIN 4
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+
+// Relay pins
+#define RELAY1_PIN 12
+#define RELAY2_PIN 13
+
+// Potentiometer pin
+#define POT_PIN 34
+
+// LED pin
+#define LED_PIN 2
+
+// Variables to store sensor data
+float temperature;
+float humidity;
+
+BlynkTimer timer;
+
+void setup() {
+  Serial.begin(115200);
+
+  // Blynk setup
+  Blynk.begin(auth, ssid, pass);
+
+  // Initialize DHT sensor
+  dht.begin();
+
+  // Set relay pins as outputs
+  pinMode(RELAY1_PIN, OUTPUT);
+  pinMode(RELAY2_PIN, OUTPUT);
+
+  // Set LED pin as output
+  pinMode(LED_PIN, OUTPUT);
+
+  // Setup a function to be called every second
+  timer.setInterval(1000L, sendSensorData);
+}
+
+void sendSensorData() {
+  // Read temperature and humidity
+  temperature = dht.readTemperature();
+  humidity = dht.readHumidity();
+
+  // Check if any reads failed and exit early (to try again)
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("Failed to read from DHT sensor!");
+    return;
+  }
+
+  // Send temperature and humidity to Blynk
+  Blynk.virtualWrite(V5, temperature);
+  Blynk.virtualWrite(V6, humidity);
+
+  // Predict condition based on temperature and humidity
+  String condition = predictCondition(temperature, humidity);
+  Blynk.virtualWrite(V7, condition);
+}
+
+String predictCondition(float temp, float hum) {
+  if (temp > 30 && hum > 70) {
+    return "Hot and Humid";
+  } else if (temp > 30) {
+    return "Hot";
+  } else if (hum > 70) {
+    return "Humid";
+  } else {
+    return "Comfortable";
+  }
+}
+
+BLYNK_WRITE(V1) {
+  int relay1State = param.asInt();
+  digitalWrite(RELAY1_PIN, relay1State);
+}
+
+BLYNK_WRITE(V2) {
+  int relay2State = param.asInt();
+  digitalWrite(RELAY2_PIN, relay2State);
+}
+
+BLYNK_WRITE(V3) {
+  int potValue = param.asInt();
+  analogWrite(LED_PIN, potValue);
+}
+
+void loop() {
+  Blynk.run();
+  timer.run();
+}
+
+// Create an instance of the server
+WebServer server(80);
+
+// Rest API endpoint handlers
+void handleRoot() {
+  server.send(200, "text/plain", "Welcome to Smarthome API");
+}
+
+void handleGetStatus() {
+  String message = "Temperature: " + String(temperature) + "\n";
+  message += "Humidity: " + String(humidity) + "\n";
+  message += "Relay 1: " + String(digitalRead(RELAY1_PIN)) + "\n";
+  message += "Relay 2: " + String(digitalRead(RELAY2_PIN)) + "\n";
+  server.send(200, "text/plain", message);
+}
+
+void setup() {
+  // Existing setup code...
+  
+  // Start the server
+  server.begin();
+  
+  // Define API endpoints
+  server.on("/", handleRoot);
+  server.on("/status", handleGetStatus);
+  
+  // Initialize other endpoints as needed
+}
+
+void loop() {
+  Blynk.run();
+  timer.run();
+  server.handleClient();
+}
+
+|======================================================================|
+
+
+## Judul Proyek
 <p>Smarthome dengan Platform Blynk, RESTful API dan MQTT</p>
 
 ## Pembagian Tim
