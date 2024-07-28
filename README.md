@@ -40,7 +40,7 @@
 6. Platform Blynk
 
 ## Dokumentasi Wokwi
-|======================================================================|
+<p>|======================================================================|<p>
 #define BLYNK_TEMPLATE_ID "TMPL6tx0XyWZc"
 #define BLYNK_TEMPLATE_NAME "22552012046"
 #define BLYNK_AUTH_TOKEN "62IWHiEW6teE4Z2x-FEG_Iabbe0rWdZN"
@@ -185,7 +185,7 @@ void loop() {
   server.handleClient();
 }
 
-|======================================================================|
+<p>|======================================================================|<p>
 
 
 ## Judul Proyek
