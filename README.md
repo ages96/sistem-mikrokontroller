@@ -41,83 +41,87 @@
 
 ## Dokumentasi Wokwi
 ```
-#define BLYNK_TEMPLATE_ID "TMPL6tx0XyWZc"
-#define BLYNK_TEMPLATE_NAME "22552012046"
-#define BLYNK_AUTH_TOKEN "62IWHiEW6teE4Z2x-FEG_Iabbe0rWdZN"
+#define BLYNK_TEMPLATE_ID "YourTemplateID"
+#define BLYNK_DEVICE_NAME "YourDeviceName"
+#define BLYNK_AUTH_TOKEN "YourAuthToken"
 
 #include <WiFi.h>
 #include <BlynkSimpleEsp32.h>
 #include <DHT.h>
-#include <WebServer.h>
+```
+- Library WiFi.h: Digunakan untuk menghubungkan ESP32 ke jaringan WiFi.
+- Library BlynkSimpleEsp32.h: Digunakan untuk menghubungkan ESP32 ke platform Blynk.
+- Library DHT.h: Digunakan untuk membaca data dari sensor DHT22.
+- BLYNK_TEMPLATE_ID, BLYNK_DEVICE_NAME, BLYNK_AUTH_TOKEN: Konstanta ini digunakan untuk menghubungkan perangkat ke Blynk.
 
-// Blynk Auth Token
+```
 char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = "YourNetworkName";
+char pass[] = "YourPassword";
 
-// WiFi credentials
-char ssid[] = "MonsterEnergy";
-char pass[] = "123456";
-
-// DHT sensor
 #define DHTPIN 4
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
-// Relay pins
 #define RELAY1_PIN 12
 #define RELAY2_PIN 13
-
-// Potentiometer pin
 #define POT_PIN 34
-
-// LED pin
 #define LED_PIN 2
 
-// Variables to store sensor data
 float temperature;
 float humidity;
 
 BlynkTimer timer;
+```
+- auth, ssid, pass: Variabel ini menyimpan token autentikasi Blynk, nama SSID, dan kata sandi WiFi.
+- DHTPIN, DHTTYPE, DHT dht: Pin dan tipe sensor DHT22 serta inisialisasi sensor.
+- RELAY1_PIN, RELAY2_PIN, POT_PIN, LED_PIN: Pin yang digunakan untuk relay, potensiometer, dan LED.
+- temperature, humidity: Variabel untuk menyimpan data suhu dan kelembapan.
+- BlynkTimer timer: Timer yang digunakan untuk menjadwalkan fungsi tertentu.
 
+```
 void setup() {
   Serial.begin(115200);
-
-  // Blynk setup
   Blynk.begin(auth, ssid, pass);
-
-  // Initialize DHT sensor
   dht.begin();
-
-  // Set relay pins as outputs
   pinMode(RELAY1_PIN, OUTPUT);
   pinMode(RELAY2_PIN, OUTPUT);
-
-  // Set LED pin as output
   pinMode(LED_PIN, OUTPUT);
-
-  // Setup a function to be called every second
   timer.setInterval(1000L, sendSensorData);
 }
+```
+- Serial.begin(115200): Inisialisasi komunikasi serial dengan baud rate 115200.
+- Blynk.begin(auth, ssid, pass): Menghubungkan ESP32 ke Blynk menggunakan token autentikasi, SSID, dan kata sandi WiFi.
+- dht.begin(): Inisialisasi sensor DHT22.
+- pinMode: Menentukan mode pin sebagai OUTPUT untuk relay dan LED.
+- timer.setInterval(1000L, sendSensorData): Menjadwalkan fungsi sendSensorData untuk dijalankan setiap 1000 milidetik (1 detik).
 
+```
 void sendSensorData() {
-  // Read temperature and humidity
   temperature = dht.readTemperature();
   humidity = dht.readHumidity();
 
-  // Check if any reads failed and exit early (to try again)
   if (isnan(temperature) || isnan(humidity)) {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
 
-  // Send temperature and humidity to Blynk
   Blynk.virtualWrite(V5, temperature);
   Blynk.virtualWrite(V6, humidity);
 
-  // Predict condition based on temperature and humidity
   String condition = predictCondition(temperature, humidity);
   Blynk.virtualWrite(V7, condition);
 }
+```
+- temperature = dht.readTemperature(): Membaca suhu dari sensor DHT22.
+- humidity = dht.readHumidity(): Membaca kelembapan dari sensor DHT22.
+- isnan(temperature) || isnan(humidity): Memeriksa apakah pembacaan sensor gagal (jika nilai tidak valid).
+- Blynk.virtualWrite(V5, temperature): Mengirim data suhu ke widget di aplikasi Blynk.
+- Blynk.virtualWrite(V6, humidity): Mengirim data kelembapan ke widget di aplikasi Blynk.
+- predictCondition(temperature, humidity): Memanggil fungsi untuk memprediksi kondisi berdasarkan suhu dan kelembapan.
+- Blynk.virtualWrite(V7, condition): Mengirim hasil prediksi ke widget di aplikasi Blynk.
 
+```
 String predictCondition(float temp, float hum) {
   if (temp > 30 && hum > 70) {
     return "Hot and Humid";
@@ -129,7 +133,14 @@ String predictCondition(float temp, float hum) {
     return "Comfortable";
   }
 }
+```
+- predictCondition(float temp, float hum): Fungsi ini mengembalikan string yang menunjukkan kondisi berdasarkan suhu dan kelembapan:
+A. Hot and Humid: Jika suhu > 30°C dan kelembapan > 70%.
+B. Hot: Jika suhu > 30°C.
+C. Humid: Jika kelembapan > 70%.
+D. Comfortable: Jika tidak ada kondisi di atas yang terpenuhi.
 
+```
 BLYNK_WRITE(V1) {
   int relay1State = param.asInt();
   digitalWrite(RELAY1_PIN, relay1State);
@@ -144,11 +155,24 @@ BLYNK_WRITE(V3) {
   int potValue = param.asInt();
   analogWrite(LED_PIN, potValue);
 }
+```
+- BLYNK_WRITE(V1): Fungsi ini dipanggil ketika nilai virtual pin V1 di Blynk berubah. Mengubah status relay 1.
+- BLYNK_WRITE(V2): Fungsi ini dipanggil ketika nilai virtual pin V2 di Blynk berubah. Mengubah status relay 2.
+- BLYNK_WRITE(V3): Fungsi ini dipanggil ketika nilai virtual pin V3 di Blynk berubah. Mengubah nilai PWM pada pin LED sesuai dengan nilai dari potensiometer.
 
+```
 void loop() {
   Blynk.run();
   timer.run();
 }
+```
+- Blynk.run(): Menjaga koneksi Blynk tetap aktif dan memproses event.
+- timer.run(): Menjalankan fungsi timer yang telah dijadwalkan.
+
+
+```
+#include <WiFi.h>
+#include <WebServer.h>
 
 // Create an instance of the server
 WebServer server(80);
@@ -185,6 +209,11 @@ void loop() {
   server.handleClient();
 }
 ```
+Untuk menambahkan Restful API.
+- WebServer server(80): Membuat instance server pada port 80.
+- server.begin(): Memulai server.
+- server.on("/", handleRoot): Menangani permintaan ke root URL dengan fungsi handleRoot.
+- server.on("/status", handleGetStatus): Menangani permintaan ke URL /status dengan fungsi handleGetStatus.
 
 
 ## Judul Proyek
