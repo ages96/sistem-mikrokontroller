@@ -16,7 +16,7 @@
   </ul>
 </ul>
 
-## Judul Proyek
+## Judul Proyek 1
 <p>Smarthome dengan Platform Blynk</p>
 
 ## Penjelasan
@@ -215,8 +215,12 @@ Untuk menambahkan Restful API.
 - server.on("/", handleRoot): Menangani permintaan ke root URL dengan fungsi handleRoot.
 - server.on("/status", handleGetStatus): Menangani permintaan ke URL /status dengan fungsi handleGetStatus.
 
+### Demo Proyek Smarthome dengan RESTful API
+<ul>
+  <li>Github: <a href="[https://github.com/ages96/sistem-mikrokontroller/tree/master/smarthome-restapi](https://wokwi.com/projects/404664348824905729)">Wokwi</a></li>
+</ul>
 
-## Judul Proyek
+## Judul Proyek 2
 <p>Smarthome dengan Platform Blynk, RESTful API dan MQTT</p>
 
 ## Pembagian Tim
